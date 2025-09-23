@@ -4,7 +4,7 @@ import store.lookup.domain.Store;
 
 import java.util.List;
 
-public interface StoreLookupRepository {
+public interface LookupStoreRepository {
 
     List<Store> lookup(double latitude, double longitude);
 

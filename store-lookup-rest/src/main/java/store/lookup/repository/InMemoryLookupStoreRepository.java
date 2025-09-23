@@ -11,7 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Repository
 @AllArgsConstructor
 @Profile("repository.in-memory")
-public class InMemoryStoreLookupRepository implements StoreLookupRepository, IndexStoreRepository {
+public class InMemoryLookupStoreRepository implements LookupStoreRepository, IndexStoreRepository {
 
     private final List<Store> stores = new CopyOnWriteArrayList<>();
 

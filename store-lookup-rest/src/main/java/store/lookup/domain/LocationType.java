@@ -19,7 +19,7 @@ public enum LocationType {
     private final String text;
 
     @JsonCreator
-    private LocationType byText(String text) {
+    public static LocationType byText(String text) {
         return Arrays
                 .stream(LocationType.values())
                 .filter(locationType -> locationType.text.equals(text))
