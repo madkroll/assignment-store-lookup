@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.springframework.context.annotation.Profile;
@@ -46,23 +47,18 @@ public class LuceneStoreRepository implements LookupStoreRepository, IndexStoreR
                 doc.add(new StoredField("complexNumber", store.complexNumber()));
                 doc.add(new IntPoint("sapStoreID", store.sapStoreID()));
                 doc.add(new StoredField("sapStoreID", store.sapStoreID()));
-                doc.add(new IntPoint("showWarningMessage", toInteger(store.showWarningMessage())));
-                doc.add(new StoredField("showWarningMessage", toInteger(store.showWarningMessage())));
-                doc.add(new IntPoint("collectionPoint", toInteger(store.collectionPoint())));
-                doc.add(new StoredField("collectionPoint", toInteger(store.collectionPoint())));
+                doc.add(new IntPoint("showWarningMessage", toIntegerFieldValue(store.showWarningMessage())));
+                doc.add(new StoredField("showWarningMessage", toIntegerFieldValue(store.showWarningMessage())));
+                doc.add(new IntPoint("collectionPoint", toIntegerFieldValue(store.collectionPoint())));
+                doc.add(new StoredField("collectionPoint", toIntegerFieldValue(store.collectionPoint())));
 
                 writer.addDocument(doc);
             }
 
             writer.commit();
         } catch (IOException e) {
-            // TODO: handle exception
-            throw new RuntimeException(e);
+            throw new RepositoryOperationException("Failed to index " + stores.size() + " documents.", e);
         }
-    }
-
-    private int toInteger(Boolean value) {
-        return value != null && value ? 1 : 0;
     }
 
     @Override
@@ -74,17 +70,17 @@ public class LuceneStoreRepository implements LookupStoreRepository, IndexStoreR
 
             // TODO: parametrize
             int lookupLimit = 5;
-            TopDocs topDocs = searcher.search(new MatchAllDocsQuery(), lookupLimit, byDistance);
+            TopDocs topDocsByCriteria = searcher.search(new MatchAllDocsQuery(), lookupLimit, byDistance);
 
             List<Store> results = new ArrayList<>();
-            for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            for (ScoreDoc scoreDoc : topDocsByCriteria.scoreDocs) {
                 Document doc = searcher.storedFields().document(scoreDoc.doc);
 
                 results.add(
                         new Store(
                                 doc.get("uuid"),
-                                doc.getField("latitude").numericValue().doubleValue(),
-                                doc.getField("longitude").numericValue().doubleValue(),
+                                fieldAsDouble(doc.getField("latitude")),
+                                fieldAsDouble(doc.getField("longitude")),
                                 LocationType.byText(doc.get("locationType")),
                                 doc.get("todayOpen"),
                                 doc.get("todayClose"),
@@ -94,20 +90,33 @@ public class LuceneStoreRepository implements LookupStoreRepository, IndexStoreR
                                 doc.get("street2"),
                                 doc.get("street3"),
                                 doc.get("addressName"),
-                                doc.getField("complexNumber").numericValue().intValue(),
-                                doc.getField("sapStoreID").numericValue().intValue(),
-                                doc.getField("showWarningMessage").numericValue().intValue() == 1,
-                                doc.getField("collectionPoint").numericValue().intValue() == 1
+                                fieldAsInteger(doc.getField("complexNumber")),
+                                fieldAsInteger(doc.getField("sapStoreID")),
+                                fieldAsBoolean(doc.getField("showWarningMessage")),
+                                fieldAsBoolean(doc.getField("collectionPoint"))
                         )
                 );
             }
 
             return results;
         } catch (IOException e) {
-            // TODO: handle error
-            throw new RuntimeException(e);
+            throw new RepositoryOperationException("Failed to query documents ", e);
         }
     }
 
+    private int toIntegerFieldValue(Boolean value) {
+        return value != null && value ? 1 : 0;
+    }
 
+    private Integer fieldAsInteger(IndexableField field) {
+        return field != null && field.numericValue() != null ? field.numericValue().intValue() : null;
+    }
+
+    private Double fieldAsDouble(IndexableField field) {
+        return field != null && field.numericValue() != null ? field.numericValue().doubleValue() : null;
+    }
+
+    private Boolean fieldAsBoolean(IndexableField field) {
+        return field != null && field.numericValue() != null ? field.numericValue().intValue() == 1 : null;
+    }
 }
