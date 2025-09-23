@@ -4,14 +4,11 @@ public record Store(
         String uuid,
         Double latitude,
         Double longitude,
-        // TODO: parse
-//        LocationType locationType,
-
+        LocationType locationType,
         // TODO: time?
-//        String todayOpen,
+        String todayOpen,
         // TODO: time?
-//        String todayClose,
-
+        String todayClose,
         String city,
         String postalCode,
         String street,
@@ -19,7 +16,6 @@ public record Store(
         String street3,
         String addressName,
         Integer complexNumber,
-
         Integer sapStoreID,
         Boolean showWarningMessage,
         Boolean collectionPoint

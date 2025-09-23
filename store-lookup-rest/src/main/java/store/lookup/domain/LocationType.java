@@ -1,10 +1,11 @@
 package store.lookup.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 @Getter
 @AllArgsConstructor
@@ -14,13 +15,15 @@ public enum LocationType {
     PUP("PuP"),
     SUPERMARKTPUP("SupermarktPuP");
 
+    @JsonValue
     private final String text;
 
-    private Optional<LocationType> byText(String text) {
+    @JsonCreator
+    private LocationType byText(String text) {
         return Arrays
                 .stream(LocationType.values())
                 .filter(locationType -> locationType.text.equals(text))
-                .findFirst();
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown location type: " + text));
     }
-
 }
