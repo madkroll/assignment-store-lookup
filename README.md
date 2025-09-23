@@ -1,2 +1,2 @@
-# assignment-closest-stores
-Find closest stores
+# assignment-store-lookup
+Find the closest stores
