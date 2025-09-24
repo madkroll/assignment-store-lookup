@@ -8,7 +8,6 @@ import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import store.lookup.domain.LocationType;
 import store.lookup.domain.Store;
@@ -20,7 +19,6 @@ import java.util.Objects;
 
 @Repository
 @AllArgsConstructor
-@Profile("repository.lucene")
 public class LuceneStoreRepository implements LookupStoreRepository, IndexStoreRepository {
 
     private final Directory directory;
