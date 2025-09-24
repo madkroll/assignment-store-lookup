@@ -5,6 +5,7 @@ import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.springframework.context.annotation.Profile;
@@ -15,6 +16,7 @@ import store.lookup.domain.Store;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 @AllArgsConstructor
@@ -62,15 +64,30 @@ public class LuceneStoreRepository implements LookupStoreRepository, IndexStoreR
     }
 
     @Override
-    public List<Store> lookup(double latitude, double longitude) {
+    public List<Store> lookup(LookupParameters lookupParameters) {
         try (DirectoryReader reader = DirectoryReader.open(directory)) {
+            Query acrossAllDocuments = new MatchAllDocsQuery();
+            Query oneOfLocationTypes = new TermInSetQuery(
+                    "locationType",
+                    lookupParameters.locationTypes()
+                            .stream()
+                            .map(locationType -> new Term("locationType", locationType.getText()).bytes()).toList()
+            );
+
+            BooleanQuery.Builder queryBuilder =
+                    new BooleanQuery.Builder()
+                            .add(acrossAllDocuments, BooleanClause.Occur.MUST)
+                            .add(oneOfLocationTypes, BooleanClause.Occur.FILTER);
+
+            if (Objects.nonNull(lookupParameters.collectionPointAvailable())) {
+                Query considerCollectionPoint = IntPoint.newExactQuery("collectionPoint", toIntegerFieldValue(lookupParameters.collectionPointAvailable()));
+                queryBuilder.add(considerCollectionPoint, BooleanClause.Occur.FILTER);
+            }
+
+            Sort byDistance = new Sort(LatLonDocValuesField.newDistanceSort("location", lookupParameters.latitude(), lookupParameters.longitude()));
+
             IndexSearcher searcher = new IndexSearcher(reader);
-
-            Sort byDistance = new Sort(LatLonDocValuesField.newDistanceSort("location", latitude, longitude));
-
-            // TODO: parametrize
-            int lookupLimit = 5;
-            TopDocs topDocsByCriteria = searcher.search(new MatchAllDocsQuery(), lookupLimit, byDistance);
+            TopDocs topDocsByCriteria = searcher.search(queryBuilder.build(), lookupParameters.limit(), byDistance);
 
             List<Store> results = new ArrayList<>();
             for (ScoreDoc scoreDoc : topDocsByCriteria.scoreDocs) {

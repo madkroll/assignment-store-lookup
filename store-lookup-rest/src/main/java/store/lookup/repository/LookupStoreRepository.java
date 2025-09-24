@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface LookupStoreRepository {
 
-    List<Store> lookup(double latitude, double longitude);
+    List<Store> lookup(LookupParameters lookupParameters);
 
 }
