@@ -22,6 +22,7 @@ class LookupController {
 
     @GetMapping("/store")
     private ResponseEntity<List<Store>> lookupStore(@Validated LookupRequestParameters requestParameters) {
+        log.debug("Request to get all stores: {}", requestParameters);
         return ResponseEntity.ok(
                 locationLookupService.lookupStore(
                         requestParameters.getLatitude(),
@@ -33,6 +34,7 @@ class LookupController {
 
     @GetMapping("/pickup")
     private ResponseEntity<List<Store>> lookupPickUpPoint(@Validated LookupRequestParameters requestParameters) {
+        log.debug("Request to get all pickup points: {}", requestParameters);
         return ResponseEntity.ok(
                 locationLookupService.lookupPickUpPoint(requestParameters.getLatitude(), requestParameters.getLongitude())
         );

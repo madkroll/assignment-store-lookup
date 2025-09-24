@@ -1,6 +1,6 @@
 package store.lookup.service;
 
-import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import store.lookup.domain.LocationType;
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+@Slf4j
 @Service
 public class LocationLookupService {
 
@@ -36,6 +37,7 @@ public class LocationLookupService {
 
         LookupParameters lookupParameters = lookupQueryBuilder.build();
 
+        log.debug("Lookup stores: {}", lookupParameters);
         return lookupStoreRepository.lookup(lookupParameters);
     }
 
@@ -48,6 +50,7 @@ public class LocationLookupService {
                 .collectionPointAvailable(true)
                 .build();
 
+        log.debug("Lookup pickup: {}", lookupPickUpPointQuery);
         return lookupStoreRepository.lookup(lookupPickUpPointQuery);
     }
 }

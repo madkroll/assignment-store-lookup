@@ -87,7 +87,8 @@ public class LuceneStoreRepository implements LookupStoreRepository, IndexStoreR
             Sort byDistance = new Sort(LatLonDocValuesField.newDistanceSort("location", lookupParameters.latitude(), lookupParameters.longitude()));
 
             IndexSearcher searcher = new IndexSearcher(reader);
-            TopDocs topDocsByCriteria = searcher.search(queryBuilder.build(), lookupParameters.limit(), byDistance);
+            BooleanQuery lookupQuery = queryBuilder.build();
+            TopDocs topDocsByCriteria = searcher.search(lookupQuery, lookupParameters.limit(), byDistance);
 
             List<Store> results = new ArrayList<>();
             for (ScoreDoc scoreDoc : topDocsByCriteria.scoreDocs) {
