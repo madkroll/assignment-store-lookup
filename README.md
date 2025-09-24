@@ -2,7 +2,7 @@
 The goal of this test assignment is to implement Java Service returning 5 closest stores for the given coordinate.
 Solution is implemented as a Java Spring Boot application performing search using Apache Lucene framework.
 Apache Lucene is a framework specifically designed for doing highly performing very fast searches.
-It provides reach API and Query language making it very easy to find entries by complex compositions of conditions, 
+It provides rich API and Query language making it very easy to find entries by complex compositions of conditions, 
 at the same time finding results very fast.
 
 Application loads original data from JSON located in classpath during the initialization.
